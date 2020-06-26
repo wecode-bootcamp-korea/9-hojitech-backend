@@ -12,6 +12,7 @@ db.sqlite3
 db.sqlite3-journal
 media
 my_settings.py
+db_uploader.py
 *.csv
 
 
