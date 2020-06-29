@@ -32,71 +32,38 @@ class SignUpView(View):
         data = json.loads(request.body)
         email_validation        =       re.compile("^\S[a-zA-Z0-9+-_.]{4,28}\S@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
         password_validation     =       re.compile("^(?=.{10,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$")
-        
         try:
-            
-            if Account.objects.filter(email = data['email']).exists():      # email 존재 여부 확인
-                
-                print("email is already exists")
-                return JsonResponse({"messege": "Email Already exists"}, status = 400)
-
-            else:       # email 등록 가능, 정규식 확인 시작
-                
-                if email_validation.match(data['email']):  # 이메일 정규식 성공
-                    print("email validation" ,email_validation.match(data['email']))
-                    if password_validation.match(data['password']):    # 비밀번호 정규식 성공
-                        # 비밀번호 암호화
-                        password = data['password'].encode('utf-8')
-                        password_bcrypt = bcrypt.hashpw(password, bcrypt.gensalt())
-                        password = password_bcrypt.decode('utf-8')
-                    
-                        Account.objects.create(email=data['email'], password=password, first_name=data['first_name'], last_name=data['last_name'])
-                        return JsonResponse( { "message" : "SignUp Success!" }, status = 200 )
-                    else:
-                        return JsonResponse( { "message" : "Password Validation Failed" }, status = 400 )
-                else:   # 이메일 정규식 실패
-                    return JsonResponse( { "message" : "Email Validation Failed!" }, status = 400 )
-                    
+            if Account.objects.filter(email = data['email']).exists():
+                return JsonResponse({"messege": "Email Already exists"}, status = 400)            
+            if email_validation.match(data['email']):
+                print("email validation" ,email_validation.match(data['email']))
+                if password_validation.match(data['password']):
+                    password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                    Account.objects.create(
+                            email=data['email'], 
+                            password=password, 
+                            first_name=data['first_name'], 
+                            last_name=data['last_name']
+                        )
+                    return HttpResponse( status = 200 )
+                else:
+                    return JsonResponse( { "message" : "INVALID_PASSWORD" }, status = 400 )
+            else:
+                    return JsonResponse( { "message" : "INVALID_EMAIL" }, status = 400 )            
         except KeyError:
             return JsonResponse({"message": "Insert Invalid Keys"}, status = 400)
-
-# login decorator
-def decorator_login(func):
-    def wrapper(self, request, *args, **kwargs):
-        try:
-            given_token = request.headers.get("Authorization", None)
-            payload = jwt.decode(given_token, SECRET_KEY, algorithms='HS256')
-            user = Account.objects.get(id = payload['id'])
-            request.user = user
-            print("login succeed")
-        
-        except jwt.exceptions.DecodeError:
-            return JsonResponse({"Error Message": "Invalid_token"}, status = 400)
-        except ObjectDoesNotExist:
-            return JsonResponse({"Error Message", "Id Dose Not Exist"}, status = 400)
-
-        return func(self, request, *args, **kwargs)
-
-    return wrapper
 
 class SignInView(View):
     def post(self, request):
         data = json.loads(request.body)
-
-        # 회원 여부 확인
         if Account.objects.filter(email = data['email']).exists():
             account         =       Account.objects.get(email = data['email'])
-            print(account)
-
-            # password 확인
             if bcrypt.checkpw(data['password'].encode('utf-8'), account.password.encode('utf-8')):
-                
-                # 비밀번호 일치
                 token = jwt.encode({'id': account.id}, SECRET_KEY, algorithm ="HS256")
                 token = token.decode('utf-8')
                 print(token)
                 return JsonResponse({"message":"Login Succeeded", "token" : token })
             else:
-                return JsonResponse({"message": "Invalid Password"})
+                return JsonResponse({"message": "INVALID_PASSWORD"})
         else:
-            return JsonResponse({"messege" : "Not Existing Account"})
+            return JsonResponse({"messege" : "INVALID_EMAIL"})
