@@ -33,8 +33,8 @@ class SignUpView(View):
         try:
             if Account.objects.filter(email = data['email']).exists():
                 return JsonResponse({"messege": "Email Already exists"}, status = 400)            
+
             if email_validation.match(data['email']):
-                print("email validation" ,email_validation.match(data['email']))
                 if password_validation.match(data['password']):
                     password = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
                     Account.objects.create(
@@ -44,24 +44,28 @@ class SignUpView(View):
                             last_name=data['last_name']
                         )
                     return HttpResponse( status = 200 )
-                else:
-                    return JsonResponse( { "message" : "INVALID_PASSWORD" }, status = 400 )
-            else:
-                    return JsonResponse( { "message" : "INVALID_EMAIL" }, status = 400 )            
+
+                return JsonResponse( { "message" : "INVALID_PASSWORD" }, status = 400 )
+
+            return JsonResponse( { "message" : "INVALID_EMAIL" }, status = 400 )            
+
         except KeyError:
-            return JsonResponse({"message": "Insert Invalid Keys"}, status = 400)
+            return JsonResponse({"message": "INVALID_KEYS"}, status = 400)
 
 class SignInView(View):
     def post(self, request):
         data = json.loads(request.body)
-        if Account.objects.filter(email = data['email']).exists():
-            account         =       Account.objects.get(email = data['email'])
-            if bcrypt.checkpw(data['password'].encode('utf-8'), account.password.encode('utf-8')):
-                token = jwt.encode({'id': account.id}, SECRET_KEY, algorithm ="HS256")
-                token = token.decode('utf-8')
-                print(token)
-                return JsonResponse({"message":"Login Succeeded", "token" : token })
-            else:
-                return JsonResponse({"message": "INVALID_PASSWORD"})
-        else:
-            return JsonResponse({"messege" : "INVALID_EMAIL"})
+        try:
+            if Account.objects.filter(email = data['email']).exists():
+                account = Account.objects.get(email = data['email'])
+
+                if bcrypt.checkpw(data['password'].encode('utf-8'), account.password.encode('utf-8')):
+                    token = jwt.encode({'id': account.id}, SECRET_KEY, algorithm = "HS256")
+                    return JsonResponse({"token" : token.decode('utf-8') }, status = 200)
+
+                return HttpResponse(status = 401)
+
+            return HttpResponse(status = 401)
+            
+        except KeyError:
+            return JsonResponse({"message": "INVALID_KEYS"}, status = 400)
