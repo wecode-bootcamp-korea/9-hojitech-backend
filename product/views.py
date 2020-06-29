@@ -7,10 +7,8 @@ from django.http  import JsonResponse, HttpResponse
 prefetch_mouse = ProductSubCategory.objects.prefetch_related('product_set')
 mouse_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1)
 keyboard_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3)
-
 mouse_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
 keyboard_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
-
 
 class ProductDetailView(View):
 	def post(self, request):
@@ -43,9 +41,6 @@ class KeyboardListView(View):
 				'thumbnail_image' : values.product_thumbnail.all()[0].thumbnail_image,
 				'thumbnail_color' : values.product_thumbnail.all()[0].thumbnail_background_color}
 				for product,values in zip(list(prefetch_mouse.get(id =3).product_set.all()), list(keyboard_thumbnail_prefetch))]
-				# and {'thumbnail_image' : values.product_thumbnail.all()[0].thumbnail_image}
-				# for values in list(mouse_thumbnail_prefetch)
-			
 			return JsonResponse({"data": keyboards}, status = 200)
 		except KeyError:
 			return JsonResponse({'massage': "product does not exists"}, status =400)
@@ -59,8 +54,7 @@ class MouseFilterListView(View):
 				'product_name' : products.name, 'description' : products.description, 
 				'thumbnail_color' : thumbnails.thumbnail_background_color,
 				'thumbnail_image': thumbnails.thumbnail_image}
-				for filter_name in mouse_filter_prefetch for products in filter_name.product.all() for thumbnails in products.product_thumbnail.all()
-    									
+				for filter_name in mouse_filter_prefetch for products in filter_name.product.all() for thumbnails in products.product_thumbnail.all()					
 			]
 			return JsonResponse({"data" : filter_data})
 		except KeyError:
