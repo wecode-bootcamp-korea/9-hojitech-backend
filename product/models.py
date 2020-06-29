@@ -116,3 +116,10 @@ class RecommendProduct(models.Model):
 
     class Meta:
         db_table='recommend_products'
+
+class ProductPrice(models.Model):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE)
+    price = models.IntegerField(null=True)
+
+    class Meta:
+        db_table='product_prices'
