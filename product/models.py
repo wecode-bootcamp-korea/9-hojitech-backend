@@ -1,3 +1,4 @@
+  
 from django.db import models
 
 class MainMenu(models.Model):
@@ -9,7 +10,6 @@ class MainMenu(models.Model):
 class ProductCategory(models.Model):
     menu = models.ForeignKey('MainMenu', on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=50, null=True)
-    
     class Meta:
         db_table='product_categories'
 
@@ -62,7 +62,7 @@ class ProductFilter(models.Model):
         db_table='product_filters'
 
 class ProductListThumbnail(models.Model):
-    product = models.ForeignKey('Product',on_delete=models.CASCADE,null=True)
+    product = models.ForeignKey('Product',on_delete=models.CASCADE,null=True, related_name="product_thumbnail")
     thumbnail_image = models.CharField(max_length=1000, null=True)
     thumbnail_background_color = models.CharField(max_length=10, null=True)
     
@@ -123,3 +123,4 @@ class ProductPrice(models.Model):
 
     class Meta:
         db_table='product_prices'
+

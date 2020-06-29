@@ -19,6 +19,7 @@ from product.views import *
 
 urlpatterns = [
 	path('productdetail', ProductDetailView.as_view()),
-	path('productfilter', ProductFilterView.as_view()),
-	path('productlist', ProductListView.as_view())
+	path('mice', MouseListView.as_view()),
+    path('keyboards', KeyboardListView.as_view()),
+    path('mice/filter', MouseFilterListView.as_view())
 ]
