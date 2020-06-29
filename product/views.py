@@ -28,6 +28,7 @@ class MouseListView(View):
 				'thumbnail_color' : values.product_thumbnail.all()[0].thumbnail_background_color
     			}
 				for product,values in zip(list(prefetch_mouse.get(id =1).product_set.all()), list(mouse_thumbnail_prefetch))
+				and {'colors' : color.color_image} for color in mouse_filter_prefetch
     		]
             return JsonResponse({"data": mice}, status = 200)
         except KeyError:

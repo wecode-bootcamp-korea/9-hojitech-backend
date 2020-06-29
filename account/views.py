@@ -4,8 +4,6 @@ import jwt
 import re
 
 from logitechpjt.settings import SECRET_KEY
-from django.shortcuts import render
-from django.shortcuts import render
 from django.views import View
 
 from account.models import Account
