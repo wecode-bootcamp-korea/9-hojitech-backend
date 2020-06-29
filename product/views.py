@@ -8,7 +8,6 @@ prefetch_mouse = ProductSubCategory.objects.prefetch_related('product_set')
 mouse_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1)
 keyboard_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3)
 
-# mouse_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1).all()[0].filterlists.all()
 mouse_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
 keyboard_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
 
