@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from cart.views import *
+from cart.views import OrderCreateView, OrderListView
 
 urlpatterns = [
 	path('ordercreation', OrderCreateView.as_view()),

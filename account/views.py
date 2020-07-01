@@ -6,9 +6,9 @@ import re
 from logitechpjt.settings import SECRET_KEY
 from django.views import View
 
-from account.models import *
-from product.models import *
-from account.utils import *
+from account.models import Account, UserProduct
+from product.models import Product
+from account.utils import decorator_login
 
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist

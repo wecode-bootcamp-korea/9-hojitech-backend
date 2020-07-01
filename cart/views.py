@@ -1,11 +1,11 @@
 from django.shortcuts import render
 import json
-from .models import *
-from product.models import *
-from account.models import *
+from .models import OrderItem, OrderStatus
+from product.models import Product
+from account.models import Account
 from django.views import View
 from django.http import JsonResponse, HttpResponse
-from account.utils import *
+from account.utils import decorator_login
 
 
 class OrderCreateView(View):
