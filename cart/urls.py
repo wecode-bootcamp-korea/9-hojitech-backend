@@ -18,6 +18,6 @@ from django.urls import path, include
 from cart.views import *
 
 urlpatterns = [
-	path('ordercreate', OrderCreateView.as_view()),
+	path('ordercreation', OrderCreateView.as_view()),
 	path('orderlist', OrderListView.as_view()),
 ]
