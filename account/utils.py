@@ -1,6 +1,7 @@
 import jwt
 from account.models import *
 from django.http import HttpResponse, JsonResponse
+from logitechpjt.settings import SECRET_KEY
 
 def decorator_login(func):
     def wrapper(self, request, *args, **kwargs):

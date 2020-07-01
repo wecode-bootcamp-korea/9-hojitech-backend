@@ -1,5 +1,7 @@
   
 from django.db import models
+from account.models import *
+from cart.models import *
 
 class MainMenu(models.Model):
     name = models.CharField(max_length=50, null=True)
@@ -27,6 +29,7 @@ class Product(models.Model):
     filter_list = models.ManyToManyField('FilterList', through='ProductFilter', related_name=('products'))
     color = models.ManyToManyField('Color', through='ProductImage', related_name=('products'))
     recommend_product = models.ManyToManyField('self', through='RecommendProduct', symmetrical=False)
+
     class Meta:
         db_table='products'
 
@@ -120,6 +123,7 @@ class RecommendProduct(models.Model):
 class ProductPrice(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     price = models.IntegerField(null=True)
+    user = models.ManyToManyField('account.Account', through='cart.OrderItem', related_name=('products'))
 
     class Meta:
         db_table='product_prices'
