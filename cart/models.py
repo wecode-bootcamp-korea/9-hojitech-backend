@@ -1,10 +1,6 @@
 from django.db import models
 
-from product.models import (
-    ProductPrice,
-    Color
-)
-from account.models import *
+from account.models import Account
 
 
 class OrderStatus(models.Model):

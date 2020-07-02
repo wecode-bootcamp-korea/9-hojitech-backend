@@ -4,7 +4,6 @@ from product.models import (
     Product,
     ProductPrice
 )
-from cart.models import *
 
 class Account(models.Model):
     email         = models.CharField(max_length=100, null = False)

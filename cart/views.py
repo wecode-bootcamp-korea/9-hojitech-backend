@@ -1,6 +1,5 @@
 import json
 
-from django.shortcuts import render
 from django.views import View
 from django.http import (
 	JsonResponse,
@@ -30,33 +29,43 @@ class OrderView(View):
 		received_email = request.user.email
 		user_account   = Account.objects.get(email=received_email)
 
-		product_name     = order_input["product_name"]
+		product_id     = order_input["product_id"]
 		product_color    = order_input["color"]
 		product_quantity = order_input["quantity"]
 		if UserOrder.objects.filter(user=user_account).exists():
 
-			user_order_account=UserOrder.objects.get(user=user_account)
+			user_order_account = UserOrder.objects.get(user=user_account)
 
 			OrderItem.objects.create(
 				user_order       = user_order_account, 
-				product_price    = Product.objects.get(name=product_name).productprice_set.get(), 
+				product_price    = Product.objects.get(id=product_id).productprice_set.get(), 
 				product_quantity = product_quantity, 
 				product_color    = Color.objects.get(name=product_color))
+			
+			order_list=user_account.userorder_set.get().orderitem_set.all()
+			user_order_account.final_price=sum([order.product_price.price*order.product_quantity for order in order_list])
+			user_order_account.save()
 
 			return JsonResponse({'message':'Added to your cart'}, status=200)		
 
 		else:
 			UserOrder.objects.create(
 				user         = user_account, 
-				order_status = OrderStatus.objects.get(id=1))
+				order_status = OrderStatus.objects.get(id=1),
+				discount     = 0,
+				final_price  = 0)
 				
-			user_order_account=UserOrder.objects.get(user=user_account)
+			user_order_account = UserOrder.objects.get(user=user_account)
 
 			OrderItem.objects.create(
 				user_order       = user_order_account, 
-				product_price    = Product.objects.get(name=product_name).productprice_set.get(), 
+				product_price    = Product.objects.get(id=product_id).productprice_set.get(), 
 				product_quantity = product_quantity, 
 				product_color    = Color.objects.get(name=product_color))
+
+			order_list=user_account.userorder_set.get().orderitem_set.all()
+			user_order_account.final_price=sum([order.product_price.price*order.product_quantity for order in order_list])
+			user_order_account.save()
 
 			return JsonResponse({'message':'Added to your cart'}, status=200)		
 

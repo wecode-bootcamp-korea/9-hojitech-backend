@@ -20,7 +20,8 @@ class ProductDetailView(View):
 		if Product.objects.filter(id=specified_product_id).exists():
 			specified_product = Product.objects.get(id=specified_product_id)
 
-			product_name        = specified_product.name
+			product_name             = specified_product.name
+			product_id               = specified_product.id
 			product_name_description = specified_product.description
 
 			product_images = ProductImage.objects.prefetch_related("color").filter(product=specified_product)
@@ -53,17 +54,18 @@ class ProductDetailView(View):
 			recommend_description = [r.description for r in recommend_product]
 			recommend_thumbnail   = [r.product_thumbnail.get().thumbnail_image for r in recommend_product]
 
-			return JsonResponse({"product_name"                 : product_name, 
-								 "product_description"          : product_name_description, 
-								 "price"                        : product_price, 
-								 "color"                        : colors, 
-								 "color_image"                  : colors_image, 
-								 "product_images"               : product_image_list, 
-								 "product_videos"               : product_videos, 
-								 "Teaser"                       : product_teaser, 
-								 "Description"                  : product_description, 
-								 "specification"                : product_specification, 
-								 "recommend_product_name"       : recommend_name, 
-								 "recommend_product_description": recommend_description, 
-								 "recommend_product_thumbnail"  : recommend_thumbnail }, status=200)
+			return JsonResponse({"product_name"                  : product_name,
+								 "product_id"                    : product_id, 			 
+								 "product_description"           : product_name_description, 
+								 "price"                         : product_price, 
+								 "color"                         : colors, 
+								 "color_image"                   : colors_image, 
+								 "product_images"                : product_image_list, 
+								 "product_videos"                : product_videos, 
+								 "Teaser"                        : product_teaser, 
+								 "Description"                   : product_description, 
+								 "specification"                 : product_specification, 
+								 "recommend_product_name"        : recommend_name, 
+								 "recommend_product_description" : recommend_description, 
+								 "recommend_product_thumbnail"   : recommend_thumbnail }, status=200)
 		return JsonResponse({"message": "Product does not exist"}, status=404)
