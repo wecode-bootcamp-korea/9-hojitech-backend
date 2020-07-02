@@ -29,7 +29,7 @@ class SignUpView(View):
     def post(self, request):
         data = json.loads(request.body)
         email_validation        =       re.compile("^\S[a-zA-Z0-9+-_.]{4,28}\S@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
-        password_validation     =       re.compile("^(?=.{10,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*\W).*$")
+        password_validation     =       re.compile("^(?=.{10,}$)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-8])(?=.*\W).*$")
         try:
             if Account.objects.filter(email = data['email']).exists():
                 return JsonResponse({"messege": "Email Already exists"}, status = 400)            
@@ -66,6 +66,6 @@ class SignInView(View):
                 return HttpResponse(status = 401)
 
             return HttpResponse(status = 401)
-            
+
         except KeyError:
             return JsonResponse({"message": "INVALID_KEYS"}, status = 400)
