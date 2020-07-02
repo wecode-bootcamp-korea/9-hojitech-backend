@@ -25,11 +25,10 @@ from account.utils import decorator_login
 class OrderView(View):
 	@decorator_login
 	def post(self, request):
-		order_input    = json.loads(request.body)
-		received_email = request.user.email
-		user_account   = Account.objects.get(email=received_email)
-
-		product_id     = order_input["product_id"]
+		order_input      = json.loads(request.body)
+		received_email   = request.user.email
+		user_account     = Account.objects.get(email=received_email)
+		product_id       = order_input["product_id"]
 		product_color    = order_input["color"]
 		product_quantity = order_input["quantity"]
 		if UserOrder.objects.filter(user=user_account).exists():
