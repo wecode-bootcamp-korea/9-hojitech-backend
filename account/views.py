@@ -3,16 +3,26 @@ import bcrypt
 import jwt
 import re
 
-from logitechpjt.settings import SECRET_KEY
-from django.views import View
-
-from account.models import Account, UserProduct
-from product.models import Product
-from account.utils import decorator_login
-
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse, HttpResponse
+from django.http import (
+    JsonResponse,
+    HttpResponse
+)
+from django.views import View
+
+from logitechpjt.settings import SECRET_KEY
+from account.models import (
+    Account, 
+    UserProduct
+)
+from account.models import (
+    UserProduct,
+    Product
+)
+from account.utils import decorator_login
+
+
 
 '''
 Email validation
@@ -90,8 +100,8 @@ class ProductRegisterView(View):
         user = request.user
 
         UserProduct(
-            user=Account.objects.get(email=user.email),
-            registered_product=Product.objects.get(name=data['model_name'])
+            user               = Account.objects.get(email=user.email),
+            registered_product = Product.objects.get(name=data['model_name'])
         ).save()
 
         return JsonResponse({"message":"Successfully saved"}, status=200)
