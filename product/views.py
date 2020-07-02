@@ -25,8 +25,8 @@ class ProductDetailView(View):
 			product_name_description = specified_product.description
 
 			product_images = ProductImage.objects.prefetch_related("color").filter(product=specified_product)
-			colors         =[]
-			colors_image   =[]
+			colors         = []
+			colors_image   = []
 			for pi in product_images:
 				if pi.color.name not in colors:
 					colors.append(pi.color.name)

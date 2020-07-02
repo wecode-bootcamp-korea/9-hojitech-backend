@@ -34,7 +34,7 @@ class OrderView(View):
 		product_quantity = order_input["quantity"]
 		if UserOrder.objects.filter(user=user_account).exists():
 
-			user_order_account = UserOrder.objects.get(user=user_account)
+			user_order_account = UserOrder.objects.get(user=user_account, order_status=OrderStatus.objects.get(id=1))
 
 			OrderItem.objects.create(
 				user_order       = user_order_account, 
@@ -42,8 +42,8 @@ class OrderView(View):
 				product_quantity = product_quantity, 
 				product_color    = Color.objects.get(name=product_color))
 			
-			order_list=user_account.userorder_set.get().orderitem_set.all()
-			user_order_account.final_price=sum([order.product_price.price*order.product_quantity for order in order_list])
+			order_list                     = user_account.userorder_set.get().orderitem_set.all()
+			user_order_account.final_price = sum([order.product_price.price*order.product_quantity for order in order_list])
 			user_order_account.save()
 
 			return JsonResponse({'message':'Added to your cart'}, status=200)		
@@ -63,8 +63,8 @@ class OrderView(View):
 				product_quantity = product_quantity, 
 				product_color    = Color.objects.get(name=product_color))
 
-			order_list=user_account.userorder_set.get().orderitem_set.all()
-			user_order_account.final_price=sum([order.product_price.price*order.product_quantity for order in order_list])
+			order_list                     = user_account.userorder_set.get().orderitem_set.all()
+			user_order_account.final_price = sum([order.product_price.price*order.product_quantity for order in order_list])
 			user_order_account.save()
 
 			return JsonResponse({'message':'Added to your cart'}, status=200)		
