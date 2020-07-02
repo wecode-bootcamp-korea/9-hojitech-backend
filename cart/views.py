@@ -16,42 +16,58 @@ from product.models import (
 	Color
 )
 from account.models import Account
+from cart.models import (
+	UserOrder,
+	OrderItem
+)
 from account.utils import decorator_login
 
 
 class OrderView(View):
 	@decorator_login
 	def post(self, request):
-		order_input = json.loads(request.body)
-		received_email=request.user.email
-		try:
-			product_name     = order_input["product_name"]
-			product_color    = order_input["color"]
-			product_quantity = order_input["quantity"]
+		order_input    = json.loads(request.body)
+		received_email = request.user.email
+		user_account   = Account.objects.get(email=received_email)
+
+		product_name     = order_input["product_name"]
+		product_color    = order_input["color"]
+		product_quantity = order_input["quantity"]
+		if UserOrder.objects.filter(user=user_account).exists():
+
+			user_order_account=UserOrder.objects.get(user=user_account)
+
 			OrderItem.objects.create(
-				user             = Account.objects.get(email=received_email), 
+				user_order       = user_order_account, 
 				product_price    = Product.objects.get(name=product_name).productprice_set.get(), 
 				product_quantity = product_quantity, 
-				product_color    = Color.objects.get(name=product_color),
-				order_status     = OrderStatus.objects.get(id=1))
+				product_color    = Color.objects.get(name=product_color))
+
 			return JsonResponse({'message':'Added to your cart'}, status=200)		
 
-		except KeyError:
-			product_name     = order_input["product_name"]
-			product_quantity = order_input["quantity"]
-			OrderItem.objects.create(user=Account.objects.get(email=received_email), 
+		else:
+			UserOrder.objects.create(
+				user         = user_account, 
+				order_status = OrderStatus.objects.get(id=1))
+				
+			user_order_account=UserOrder.objects.get(user=user_account)
+
+			OrderItem.objects.create(
+				user_order       = user_order_account, 
 				product_price    = Product.objects.get(name=product_name).productprice_set.get(), 
 				product_quantity = product_quantity, 
-				product_color    = Color.objects.get(name=""),
-				order_status     = OrderStatus.objects.get(id=1))
-			return JsonResponse({'message':'Added to your cart'}, status=200)	
+				product_color    = Color.objects.get(name=product_color))
+
+			return JsonResponse({'message':'Added to your cart'}, status=200)		
+
 
 class OrderListView(View):
 	@decorator_login
 	def get(self, request):
 		received_email=request.user.email
-		order_list=OrderItem.objects.prefetch_related('product_price').filter(user_id=Account.objects.get(email=received_email))
-		total_price=sum([ou.product_price.price*ou.product_quantity for ou in order_list])
+		user_account   = Account.objects.get(email=received_email)
+		order_list=OrderItem.objects.filter(user_order=UserOrder.objects.get(user=user_account, order_status=OrderStatus.objects.get(id=1)))
+		total_price=sum([order.product_price.price*order.product_quantity for order in order_list])
 
 		product_id=[]
 		for order in order_list:
@@ -68,6 +84,7 @@ class OrderListView(View):
 					"id"             :n,
 					"name"           :specified_product.name,
 					"thumbnail_image":specified_product.product_thumbnail.get().thumbnail_image,
+					"color_name"     :s.product_color.name, 
 					"color_image"    :s.product_color.color_image, 
 					"price"          :s.product_price.price*s.product_quantity,
 					"quantity"       :s.product_quantity})

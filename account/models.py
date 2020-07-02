@@ -4,7 +4,7 @@ from product.models import (
     Product,
     ProductPrice
 )
-from cart.models import OrderItem
+from cart.models import *
 
 class Account(models.Model):
     email         = models.CharField(max_length=100, null = False)
@@ -12,7 +12,6 @@ class Account(models.Model):
     first_name    = models.CharField(max_length = 100)
     last_name     = models.CharField(max_length = 100)
     created_at    = models.DateField(auto_now_add=True)
-    product_price = models.ManyToManyField('product.ProductPrice', through='cart.OrderItem', related_name=('accounts'))
 
     class Meta:
         db_table = "accounts"

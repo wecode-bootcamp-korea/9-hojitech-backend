@@ -123,7 +123,6 @@ class RecommendProduct(models.Model):
 class ProductPrice(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE)
     price   = models.IntegerField(null=True)
-    user    = models.ManyToManyField('account.Account', through='cart.OrderItem', related_name=('products'))
 
     class Meta:
         db_table='product_prices'

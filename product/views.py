@@ -14,14 +14,14 @@ from .models import (
 
 class ProductDetailView(View):
 	def get(self, request, product_id):
-		
+
 		specified_product_id=product_id
 
 		if Product.objects.filter(id=specified_product_id).exists():
 			specified_product = Product.objects.get(id=specified_product_id)
 
 			product_name        = specified_product.name
-			product_description = specified_product.description
+			product_name_description = specified_product.description
 
 			product_images = ProductImage.objects.prefetch_related("color").filter(product=specified_product)
 			colors         =[]
@@ -54,7 +54,7 @@ class ProductDetailView(View):
 			recommend_thumbnail   = [r.product_thumbnail.get().thumbnail_image for r in recommend_product]
 
 			return JsonResponse({"product_name"                 : product_name, 
-								 "product_description"          : product_description, 
+								 "product_description"          : product_name_description, 
 								 "price"                        : product_price, 
 								 "color"                        : colors, 
 								 "color_image"                  : colors_image, 
