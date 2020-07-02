@@ -1,62 +1,71 @@
-from django.shortcuts import render
 import json
-from .models import *
-from django.views import View
-from django.http  import JsonResponse, HttpResponse
 
-prefetch_mouse = ProductSubCategory.objects.prefetch_related('product_set')
-mouse_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1)
-keyboard_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3)
-mouse_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=1).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
-keyboard_filter_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category=3).all()[0].filterlists.all().filter(filter_name='멀티 디바이스')
+from django.shortcuts import render
+from django.views import View
+from django.http import (
+	JsonResponse,
+	HttpResponse
+)
+
+from .models import (
+	Product,
+	ProductImage
+)
 
 class ProductDetailView(View):
-	def post(self, request):
-		product_name_input=json.loads(request.body)
-		if Product.objects.filter(name=product_name_input['product_name']).exists():
-			return JsonResponse({"Teaser":ProductTeaser.objects(product=Product.objects.filter(name=product_name_input['product_name'])[0].teaser)}, status=200)
-		else:
-			return JsonResponse({"message":"Wrong Product Name"}, status=400)
+	def get(self, request, product_id):
 
-class MouseListView(View):
-    def get(self, request):
-        try:
-            mice = [
-				{
-        		'product_name' : product.name, 'description' : product.description,
-				'thumbnail_image' : values.product_thumbnail.all()[0].thumbnail_image,
-				'thumbnail_color' : values.product_thumbnail.all()[0].thumbnail_background_color
-    			}
-				for product,values in zip(list(prefetch_mouse.get(id =1).product_set.all()), list(mouse_thumbnail_prefetch))
-				and {'colors' : color.color_image} for color in mouse_filter_prefetch
-    		]
-            return JsonResponse({"data": mice}, status = 200)
-        except KeyError:
-            return JsonResponse({'massage': "product does not exists"}, status =400)
+		specified_product_id=product_id
 
-class KeyboardListView(View):
-	def get(self, request):
-		try:
-			keyboards = [
-				{'product_name' : product.name, 'description' : product.description,
-				'thumbnail_image' : values.product_thumbnail.all()[0].thumbnail_image,
-				'thumbnail_color' : values.product_thumbnail.all()[0].thumbnail_background_color}
-				for product,values in zip(list(prefetch_mouse.get(id =3).product_set.all()), list(keyboard_thumbnail_prefetch))]
-			return JsonResponse({"data": keyboards}, status = 200)
-		except KeyError:
-			return JsonResponse({'massage': "product does not exists"}, status =400)
+		if Product.objects.filter(id=specified_product_id).exists():
+			specified_product = Product.objects.get(id=specified_product_id)
 
-class MouseFilterListView(View):
-	def get(self, request):	
-		# data =  json.loads(request.body)
-		try:
-			filter_data = [
-				{
-				'product_name' : products.name, 'description' : products.description, 
-				'thumbnail_color' : thumbnails.thumbnail_background_color,
-				'thumbnail_image': thumbnails.thumbnail_image}
-				for filter_name in mouse_filter_prefetch for products in filter_name.product.all() for thumbnails in products.product_thumbnail.all()					
-			]
-			return JsonResponse({"data" : filter_data})
-		except KeyError:
-			return JsonResponse({"message": "product does not exists"}, status = 400)
+			product_name             = specified_product.name
+			product_id               = specified_product.id
+			product_name_description = specified_product.description
+
+			product_images = ProductImage.objects.prefetch_related("color").filter(product=specified_product)
+			colors         = []
+			colors_image   = []
+			for pi in product_images:
+				if pi.color.name not in colors:
+					colors.append(pi.color.name)
+					colors_image.append(pi.color.color_image)
+
+			product_image_list={}
+			images=[]
+			n=1
+			for cl in colors:
+				for pi in product_images:
+					if pi.color.name==cl:
+						if pi.image not in images:
+							images.append(pi.image)
+				product_image_list[f"color{n}"]=images
+				n+=1
+				images=[]
+
+			product_videos        = [pv.video for pv in specified_product.productvideo_set.all()]
+			product_price         = specified_product.productprice_set.get().price
+			product_teaser        = specified_product.productteaser_set.get().teaser
+			product_description   = specified_product.productdescription_set.get().description
+			product_specification = specified_product.productspecification_set.get().specification
+			recommend_product     = specified_product.recommend_product.all()
+			recommend_name        = [r.name for r in recommend_product]
+			recommend_description = [r.description for r in recommend_product]
+			recommend_thumbnail   = [r.product_thumbnail.get().thumbnail_image for r in recommend_product]
+
+			return JsonResponse({"product_name"                  : product_name,
+								 "product_id"                    : product_id, 			 
+								 "product_description"           : product_name_description, 
+								 "price"                         : product_price, 
+								 "color"                         : colors, 
+								 "color_image"                   : colors_image, 
+								 "product_images"                : product_image_list, 
+								 "product_videos"                : product_videos, 
+								 "Teaser"                        : product_teaser, 
+								 "Description"                   : product_description, 
+								 "specification"                 : product_specification, 
+								 "recommend_product_name"        : recommend_name, 
+								 "recommend_product_description" : recommend_description, 
+								 "recommend_product_thumbnail"   : recommend_thumbnail }, status=200)
+		return JsonResponse({"message": "Product does not exist"}, status=404)
