@@ -5,8 +5,22 @@ from django.urls import (
     include
 )
 
-from product.views import ProductDetailView
+from product.views import (
+    ProductDetailView,
+    MouseFilterListView,
+    KeyboardFilterListView,
+    MouseListView,
+    KeyboardListView,
+    TotalProductListForMain,
+    TestFilterListView
+)
 
 urlpatterns = [
-	path('/productdetail/<slug:product_id>', ProductDetailView.as_view())
+	path('/mice', MouseListView.as_view()),
+    path('/keyboards', KeyboardListView.as_view()),
+    path('/mice/filter', MouseFilterListView.as_view()),
+    path('', TotalProductListForMain.as_view()),
+    path('/keyboards/filter', KeyboardFilterListView.as_view()),
+	path('/productdetail/<slug:product_id>', ProductDetailView.as_view()),
+    path('/test', TestFilterListView.as_view())
 ]
