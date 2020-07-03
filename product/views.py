@@ -60,7 +60,6 @@ class MouseFilterListView(View):
     def get(self, request):
         categoryId = request.GET.get('filter')
         mouse_filter_prefetch = FilterCategory.objects.filter(sub_category=1).prefetch_related('filterlist_set').all()
-        print(mouse_filter_prefetch)
         try:
             filter_data = [
                 {
