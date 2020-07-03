@@ -1,8 +1,9 @@
 import json
 from .models import (
     FilterCategory,
-    Color, Filter,
-    List, Product,
+    Color, 
+	FilterList,
+	Product,
     ProductSubCategory,
     ProductTeaser,
 	Product,
@@ -55,9 +56,12 @@ class KeyboardListView(View):
 				'product_name'		: product.name,
      			'description'		: product.description,
 				'thumbnail_image'	: values.product_thumbnail.all()[0].thumbnail_image,
-				'thumbnail_color'	: values.product_thumbnail.all()[0].thumbnail_background_color
+				'thumbnail_color'	: values.product_thumbnail.all()[0].thumbnail_background_color,
+				'colors'			: [
+        								colorlist.colors.all()[i].color_image for i in range(0, len(colorlist.colors.all()),4)
+                					]
     			}
-				for product,values in zip(list(prefetch_keyboard.get(id = 3).product_set.all()), list(keyboard_thumbnail_prefetch))
+				for product,values,colorlist in zip(list(prefetch_keyboard.get(id = 3).product_set.all()), list(keyboard_thumbnail_prefetch), keyboard_thumbnail_prefetch.all())
     		]
             
             return JsonResponse({"data": keyboards}, status = 200)
@@ -189,3 +193,31 @@ class ProductDetailView(View):
 								 "recommend_product_thumbnail"   : recommend_thumbnail }, status=200)
 		return JsonResponse({"message": "Product does not exist"}, status=404)
 
+class TestFilterListView(View):
+	def get(self, request):
+		if request.GET.get('filter') is None:
+			category_num = {}
+		else:
+			category_num = {'category_num': int(request.GET.get('filter'))}
+			print(category_num)
+		mouse_filter_prefetch = FilterCategory.objects.filter(sub_category=3).prefetch_related('filterlist_set').all()
+
+		try:
+			filter_data = [
+				{
+				'product_name'		: product.name,
+				'product_id'		: product.id,
+    			'description'		: product.description, 
+				'thumbnail_color'	: thumbnails.thumbnail_background_color,
+				'thumbnail_image'	: thumbnails.thumbnail_image,
+				'colors' 			: [
+        								product.colors.all()[i].color_image for i in range(0, len(product.colors.all()),4)
+                					]
+    			}
+                for category in mouse_filter_prefetch for sub_category in category.filterlist_set.all().prefetch_related('product').filter(**category_num) for product in sub_category.product.all() for thumbnails in product.product_thumbnail.all()
+            ]
+
+			return JsonResponse({"data" : filter_data}, status = 200)
+        
+		except KeyError:
+			return JsonResponse({"message": "INVALID_PRODUCT"}, status = 400)

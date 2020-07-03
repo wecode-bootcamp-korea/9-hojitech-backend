@@ -12,13 +12,15 @@ from product.views import (
     MouseListView,
     KeyboardListView,
     TotalProductListForMain,
+    TestFilterListView
 )
 
 urlpatterns = [
-	path('mice', MouseListView.as_view()),
-    path('keyboards', KeyboardListView.as_view()),
-    path('mice/filter', MouseFilterListView.as_view()),
+	path('/mice', MouseListView.as_view()),
+    path('/keyboards', KeyboardListView.as_view()),
+    path('/mice/filter', MouseFilterListView.as_view()),
     path('', TotalProductListForMain.as_view()),
-    path('keyboards/filter', KeyboardFilterListView.as_view()),
-	path('/productdetail/<slug:product_id>', ProductDetailView.as_view())
+    path('/keyboards/filter', KeyboardFilterListView.as_view()),
+	path('/productdetail/<slug:product_id>', ProductDetailView.as_view()),
+    path('/test', TestFilterListView.as_view())
 ]
