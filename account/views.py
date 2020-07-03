@@ -3,14 +3,26 @@ import bcrypt
 import jwt
 import re
 
-from logitechpjt.settings import SECRET_KEY
-from django.views import View
-
-from account.models import Account
-
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import JsonResponse, HttpResponse
+from django.http import (
+    JsonResponse,
+    HttpResponse
+)
+from django.views import View
+
+from logitechpjt.settings import SECRET_KEY
+from account.models import (
+    Account, 
+    UserProduct
+)
+from account.models import (
+    UserProduct,
+    Product
+)
+from account.utils import decorator_login
+
+
 
 '''
 Email validation
@@ -69,3 +81,27 @@ class SignInView(View):
 
         except KeyError:
             return JsonResponse({"message": "INVALID_KEYS"}, status = 400)
+
+class ProductRegisterView(View):
+    @decorator_login
+    def get(self, request):
+        user = request.user
+        product_all = Product.objects.select_related("sub_category").filter(
+            Q(sub_category__id=1) | Q(sub_category__id=3))
+        subcate_id = [
+            {"cate_id": product.sub_category.id, "cate_name": product.sub_category.name, "models": product.name} for
+            product in product_all]
+        print(subcate_id)
+        return JsonResponse({"data": subcate_id})
+
+    @decorator_login
+    def post(self, request):
+        data = json.loads(request.body)
+        user = request.user
+
+        UserProduct(
+            user               = Account.objects.get(email=user.email),
+            registered_product = Product.objects.get(name=data['model_name'])
+        ).save()
+
+        return JsonResponse({"message":"Successfully saved"}, status=200)
