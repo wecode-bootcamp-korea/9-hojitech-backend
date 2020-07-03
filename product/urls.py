@@ -11,7 +11,7 @@ from product.views import (
     KeyboardFilterListView,
     MouseListView,
     KeyboardListView,
-    TotalProductListForMain
+    TotalProductListForMain,
 )
 
 urlpatterns = [
