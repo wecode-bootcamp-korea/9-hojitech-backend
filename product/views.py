@@ -15,51 +15,50 @@ from django.http import (
 )
 
 class MouseListView(View):
-    def get(self, request):
-        prefetch_mouse = ProductSubCategory.objects.prefetch_related('product_set')
-        mouse_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category = 1)
-        try:
-            mice = [
+	def get(self, request):
+		mouse_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category = 1)
+		try:
+			mice = [
+				{
+				'product_name'		: product.name,
+				'product_id'		: product.id,
+				'description'		: product.description,
+				'thumbnail_image'	: product.product_thumbnail.first().thumbnail_image,
+				'thumbnail_color'	: product.product_thumbnail.first().thumbnail_background_color,
+				'colors'			: [
+										color.color_image for color in product.color.distinct()
+									]
+				}
+				for product in mouse_thumbnail_prefetch.all()
+			]
+
+			return JsonResponse({"data": mice}, status = 200)
+
+		except KeyError:
+			return JsonResponse({'massage': "INVALID_PRODUCT"}, status = 400)
+
+class KeyboardListView(View):
+	def get(self, request): 
+		keyboard_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category = 3)
+		try:
+			keyboards = [
 				{
         		'product_name'		: product.name,
 				'product_id'		: product.id,
           		'description'		: product.description,
-				'thumbnail_image'	: values.product_thumbnail.all()[0].thumbnail_image,
-				'thumbnail_color'	: values.product_thumbnail.all()[0].thumbnail_background_color,
+				'thumbnail_image'	: product.product_thumbnail.first().thumbnail_image,
+				'thumbnail_color'	: product.product_thumbnail.first().thumbnail_background_color,
 				'colors'			: [
-        								colorlist.colors.all()[i].color_image for i in range(0, len(colorlist.colors.all()),4)
+        								color.color_image for color in product.color.distinct()
                 					]
     			}
-				for product,values,colorlist in zip(list(prefetch_mouse.get(id =1).product_set.all()), list(mouse_thumbnail_prefetch), mouse_thumbnail_prefetch.all() )
+				for product in keyboard_thumbnail_prefetch.all()
 			]
 
-            return JsonResponse({"data": mice}, status = 200)
+			return JsonResponse({"data": keyboards}, status = 200)
 
-        except KeyError:
-            return JsonResponse({'massage': "INVALID_PRODUCT"}, status = 400)
-
-class KeyboardListView(View):
-    def get(self, request): 
-        prefetch_keyboard = ProductSubCategory.objects.prefetch_related('product_set')
-        keyboard_thumbnail_prefetch = Product.objects.prefetch_related('product_thumbnail').filter(sub_category = 3)
-        try:
-            keyboards = [
-				{
-				'product_name'		: product.name,
-     			'description'		: product.description,
-				'thumbnail_image'	: values.product_thumbnail.all()[0].thumbnail_image,
-				'thumbnail_color'	: values.product_thumbnail.all()[0].thumbnail_background_color,
-				'colors'			: [
-        								colorlist.colors.all()[i].color_image for i in range(0, len(colorlist.colors.all()),4)
-                					]
-    			}
-				for product,values,colorlist in zip(list(prefetch_keyboard.get(id = 3).product_set.all()), list(keyboard_thumbnail_prefetch), keyboard_thumbnail_prefetch.all())
-    		]
-            
-            return JsonResponse({"data": keyboards}, status = 200)
-        
-        except KeyError:
-            return JsonResponse({'massage': "INVALID_PRODUCT"}, status = 400)
+		except KeyError:
+			return JsonResponse({'massage': "INVALID_PRODUCT"}, status = 400)
 		
 class MouseFilterListView(View):
     def get(self, request):
