@@ -14,14 +14,6 @@ from django.http import (
 	HttpResponse
 )
 
-class ProductDetailView(View):
-	def post(self, request):
-		product_name_input=json.loads(request.body)
-		if Product.objects.filter(name=product_name_input['product_name']).exists():
-			return JsonResponse({"Teaser":ProductTeaser.objects(product=Product.objects.filter(name=product_name_input['product_name'])[0].teaser)}, status = 200)
-
-		return JsonResponse({"message":"INVALID_PRODUCT"}, status = 400)
-
 class MouseListView(View):
     def get(self, request):
         prefetch_mouse = ProductSubCategory.objects.prefetch_related('product_set')
